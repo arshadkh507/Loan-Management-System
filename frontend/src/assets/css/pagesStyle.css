@@ -1,0 +1,104 @@
+.page-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  min-height: calc(100vh - 200px);
+}
+
+.page-heading {
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-align: left;
+  margin-bottom: 10px;
+}
+.heading-2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: left;
+  margin-bottom: 10px;
+}
+.heading-3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: left;
+  margin-bottom: 10px;
+}
+.heading-4 {
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+.custom-hr {
+  border: 0;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    #ff6f61,
+    #d9534f,
+    #5bc0de,
+    #0275d8,
+    #f0ad4e,
+    #f7a35c
+  );
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.form-lable {
+  font-size: 14px;
+}
+
+form {
+  font-size: 13px;
+}
+
+form label {
+  margin-top: 10px;
+}
+
+form input::placeholder {
+  font-size: 12px;
+}
+
+form select option {
+  font-size: 12px;
+}
+
+table {
+  font-size: 13px;
+}
+
+.form-control {
+  font-size: 13px;
+}
+
+.send-btn {
+  font-size: 13px;
+}
+/* scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent);
+}
+
+.customer-name {
+  text-transform: capitalize;
+}
+.total-row td {
+  background-color: var(--gray-bg) !important;
+  font-weight: 900;
+}
+
+.report-total {
+  text-align: right;
+}

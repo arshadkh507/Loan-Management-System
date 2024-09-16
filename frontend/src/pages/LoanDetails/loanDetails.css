@@ -1,0 +1,44 @@
+.loan-details-container {
+  overflow-x: auto;
+}
+.table-make-responsive {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* table thead th {
+  white-space: nowrap;
+  min-width: 100px;
+} */
+table thead th:first-child {
+  max-width: 50px;
+}
+.highlight-row {
+  background-color: #f0f8ff !important;
+}
+
+/* @media screen and (min-width: 900px) {
+  .table-make-responsive {
+    overflow-x: auto;
+    box-sizing: border-box;
+    width: 767px;
+    margin: auto;
+  }
+}
+@media screen and (min-width: 1200px) {
+  .table-make-responsive {
+    overflow-x: auto;
+    box-sizing: border-box;
+    width: 100%;
+    margin: auto;
+  }
+}
+@media screen and (min-width: 1400px) {
+  .table-make-responsive {
+    overflow-x: auto;
+    box-sizing: border-box;
+    /* width: 1040px; 
+    width: 100%;
+    margin: auto;
+  }
+} */

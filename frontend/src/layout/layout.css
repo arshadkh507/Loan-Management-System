@@ -1,0 +1,27 @@
+#page-content-wrapper {
+  flex: 1;
+  margin-left: 250px;
+  position: relative;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease-out;
+  background-color: #f8f9fa;
+}
+
+/* Handle sidebar collapse */
+@media screen and (min-width: 992px) {
+  #page-content-wrapper.collapsed-sidebar {
+    margin-left: 70px;
+  }
+}
+
+#wrapper main {
+  padding: 1rem 3rem 5rem;
+}
+
+@media screen and (max-width: 992px) {
+  #page-content-wrapper {
+    width: 100%;
+    margin-left: 0px;
+    flex: 1;
+  }
+}

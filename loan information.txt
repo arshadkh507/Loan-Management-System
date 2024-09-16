@@ -1,0 +1,18 @@
+Principal: This is the original amount of money that is being borrowed.
+Loan Term: The amount of time that the borrower has to repay the loan.
+Interest Rate: The rate at which the amount of money owed increases, usually expressed in terms of an annual percentage rate (APR).
+Loan Payments: The amount of money that must be paid every month or week in order to satisfy the terms of the loan. Based on the principal, loan term, and interest rate, this can be determined from an amortization table.
+
+
+
+Payment Types
+----------------
+1. Credit Cards
+2. Debit Cards
+3. Automated Clearing House (ACH)
+4. Cash
+5. Paper Checks
+6. eChecks
+7. Digital Payments
+Digital Wallets
+8. Money Orders

@@ -1,0 +1,175 @@
+/* Importing Fonts */
+/* @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"); */
+@import url("https://fonts.googleapis.com/css2?family=Signika+Negative:wght@300..700&display=swap");
+
+/* Defining Font Families */
+:root {
+  /* --montserrat-ff: "Montserrat", sans-serif; */
+  /* --open-sans-ff: "Open Sans", sans-serif; */
+  --signika-ff: "Signika Negative", sans-serif;
+
+  /* Primary Color Palette */
+  --primary-dark: #1b262c;
+  --primary: #0f4c75;
+  --accent: #3282b8;
+  --light-accent: #bbe1fa;
+
+  /* Light Theme */
+  --background-light: var(--light-accent);
+  --background-light-secondary: #f0f4f8; /* Lighter background for sections */
+  --text-light: var(--primary-dark);
+  --text-light-secondary: #333333; /* Secondary text color for readability */
+  --border-light: #e0e0e0; /* Light border color */
+  --gray-bg: #e9ecef;
+
+  /* Dark Theme */
+  --background-dark: var(--primary-dark);
+  --background-dark-secondary: #2c3e50; /* Darker shade for sections */
+  --text-dark: var(--light-accent);
+  --text-dark-secondary: #ecf0f1; /* Secondary text color for readability */
+  --border-dark: #34495e; /* Dark border color */
+
+  /* Semi-Dark Theme */
+  --background-semi-dark: var(--primary);
+  --background-semi-dark-secondary: #1f2d3d; /* Darker shade for sections */
+  --text-semi-dark: var(--light-accent);
+  --text-semi-dark-secondary: #d0e1e9; /* Secondary text color for readability */
+  --border-semi-dark: #1a2b38; /* Semi-dark border color */
+
+  /* Minimal Theme */
+  --background-minimal: #ffffff; /* Pure white */
+  --background-minimal-secondary: #f8f9fa; /* Very light background for sections */
+  --text-minimal: var(--primary-dark);
+  --text-minimal-secondary: #6c757d; /* Secondary text color for subtlety */
+  --border-minimal: #dee2e6; /* Minimal border color */
+
+  /* Additional Colors */
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --error-color: #dc3545;
+
+  /* Heading Colors */
+  --heading-primary: var(--primary);
+  --heading-secondary: var(--accent);
+
+  /* Button Colors */
+  --button-primary-bg: var(--primary);
+  --button-primary-text: #ffffff;
+  --button-secondary-bg: var(--accent);
+  --button-secondary-text: #ffffff;
+  --button-danger-bg: var(--error-color);
+  --button-danger-text: #ffffff;
+}
+
+/* Applying Default Font */
+* {
+  font-family: var(--signika-ff) !important;
+}
+
+/* Example usage in CSS */
+body.light-theme {
+  background-color: var(--background-light);
+  color: var(--text-light);
+  overflow-x: hidden;
+}
+
+body.light-theme .section {
+  background-color: var(--background-light-secondary);
+}
+
+body.dark-theme {
+  background-color: var(--background-dark);
+  color: var(--text-dark);
+  overflow-x: hidden;
+}
+
+body.dark-theme .section {
+  background-color: var(--background-dark-secondary);
+}
+
+body.semi-dark-theme {
+  background-color: var(--background-semi-dark);
+  color: var(--text-semi-dark);
+
+  overflow-x: hidden;
+}
+
+body.semi-dark-theme .section {
+  background-color: var(--background-semi-dark-secondary);
+}
+
+body.minimal-theme {
+  background-color: var(--background-minimal);
+  color: var(--text-minimal);
+  overflow-x: hidden;
+}
+
+body.minimal-theme .section {
+  background-color: var(--background-minimal-secondary);
+}
+
+body {
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--heading-primary);
+}
+
+h1.secondary,
+h2.secondary,
+h3.secondary,
+h4.secondary,
+h5.secondary,
+h6.secondary {
+  color: var(--heading-secondary);
+}
+
+.alert-success {
+  background-color: var(--success-color);
+}
+
+.alert-warning {
+  background-color: var(--warning-color);
+}
+
+.alert-error {
+  background-color: var(--error-color);
+}
+
+.button-primary {
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+}
+
+.button-secondary {
+  background-color: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+}
+
+.button-danger {
+  background-color: var(--button-danger-bg);
+  color: var(--button-danger-text);
+}
+
+/* Borders */
+.border-light {
+  border-color: var(--border-light);
+}
+
+.border-dark {
+  border-color: var(--border-dark);
+}
+
+.border-semi-dark {
+  border-color: var(--border-semi-dark);
+}
+
+.border-minimal {
+  border-color: var(--border-minimal);
+}
