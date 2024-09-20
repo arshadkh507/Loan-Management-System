@@ -35,13 +35,22 @@ const CustomerLoanItem = ({ loan, loanIndex, onLoanClick }) => {
         <span className="label">Remaining:</span>
         <span className="value">{loan.remaining || 0}</span>
       </div>
-      <Button
-        className="add-payment-btn"
-        variant="primary"
-        onClick={() => navigate(`/loan-payments/add/${loan._id}`)}
-      >
-        Add Loan Payment
-      </Button>
+      {loan.remaining <= 0 && (
+        <div className="detail-item su">
+          <span className="label">Status:</span>
+          <span className="value text-success fw-bolder">Paid Completely</span>
+        </div>
+      )}
+      {loan.remaining > 0 && (
+        <Button
+          className="add-payment-btn"
+          variant="primary"
+          disabled={loan.remaining <= 0}
+          onClick={() => navigate(`/loan-payments/add/${loan._id}`)}
+        >
+          Add Loan Payment
+        </Button>
+      )}
     </div>
   );
 };

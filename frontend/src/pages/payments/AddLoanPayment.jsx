@@ -26,10 +26,13 @@ const getTodayDate = () => {
 
 const AddLoanPayment = () => {
   const { id } = useParams();
-  console.log(id);
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Determine if this is edit or add mode
+  const isEditMode = location.pathname.includes("/edit");
+
+  // Fetch loan payment if in edit mode
   const {
     data: loanPayment,
     error: fetchError,
@@ -37,6 +40,7 @@ const AddLoanPayment = () => {
     isError: isLoanPaymentsError,
     refetch,
   } = useGetLoanPaymentByIdQuery(id);
+
   console.log(loanPayment);
   const {
     data: singleLoan,
@@ -60,15 +64,22 @@ const AddLoanPayment = () => {
     },
   ] = useCreateLoanPaymentMutation();
 
+  const [updateLoanPayment, { isLoading: isUpdatingLoanPayment }] =
+    useUpdateLoanPaymentMutation();
+
   useEffect(() => {
-    if (loanPayment) {
+    if (loanPayment && isEditMode) {
+      // Pre-fill form data in edit mode
+      const formattedDate = new Date(loanPayment.paymentDate)
+        .toISOString()
+        .split("T")[0];
       setFormData({
-        paidAmount: "",
+        paidAmount: loanPayment.paid || "",
         details: loanPayment.details || "",
-        date: getTodayDate(),
+        date: formattedDate || getTodayDate(),
       });
     }
-  }, [loanPayment]);
+  }, [loanPayment, isEditMode]);
 
   const handleChange = (e) => {
     setFormData({
@@ -105,28 +116,41 @@ const AddLoanPayment = () => {
     };
 
     try {
-      await createLoanPayment(loanPaymentData).unwrap();
+      if (isEditMode) {
+        // Edit loan payment
+        await updateLoanPayment({ ...loanPaymentData }).unwrap();
+        SuccessAlert({ text: "Payment updated successfully." });
+      } else {
+        // Add new loan payment
+        await createLoanPayment(loanPaymentData).unwrap();
+        SuccessAlert({ text: "Payment added successfully." });
+      }
 
-      SuccessAlert({ text: "Payment added successfully." });
+      // Clear form after success
       setFormData({ paidAmount: "", details: "", date: getTodayDate() });
       refetch();
       navigate("/loan-payments/details");
     } catch (error) {
-      console.error("Error adding payment:", error);
-      ErrorAlert({ text: "Failed to add payment. Please try again." });
+      console.error("Error adding/updating payment:", error);
+      ErrorAlert({ text: "Failed to process payment. Please try again." });
     }
   };
 
-  const previousAmount = loanPayment?.remaining || 0;
+  const previousAmount = isEditMode
+    ? loanPayment?.remaining + loanPayment?.paid || 0 // Use 0 if loanPayment is missing
+    : loanPayment?.remaining || 0;
   const paidAmount = parseFloat(formData.paidAmount) || 0;
   const remainingAmount = previousAmount - paidAmount;
 
   const loading = isLoanPaymentLoading || isLoanLoading;
-  const addingLoading = isCreatingLoanPayment;
+  const processingLoading = isCreatingLoanPayment || isUpdatingLoanPayment;
 
   return (
     <div className="page-container">
-      <h1 className="page-heading">Add Loan Payment</h1>
+      <h1 className="page-heading">
+        {" "}
+        {isEditMode ? "Edit Loan Payment" : "Add Loan Payment"}
+      </h1>
       <hr className="custom-hr" />
 
       {loading && <LoadingSpinner />}
@@ -230,9 +254,15 @@ const AddLoanPayment = () => {
                 variant="primary"
                 type="submit"
                 className="mt-3"
-                disabled={addingLoading}
+                disabled={processingLoading}
               >
-                {addingLoading ? "Processing Payment..." : "Add Payment"}
+                {processingLoading
+                  ? isEditMode
+                    ? "Updating Payment..."
+                    : "Adding Payment..."
+                  : isEditMode
+                  ? "Update Payment"
+                  : "Add Payment"}
               </Button>
             </Col>
           </Row>
@@ -243,42 +273,3 @@ const AddLoanPayment = () => {
 };
 
 export default AddLoanPayment;
-
-// const loanPaymentData = {
-//   loanId: loanPayment.loanId,
-//   customerId: loanPayment.customerId,
-//   customerName: loanPayment.customerName,
-//   totalAmount: loanPayment.totalAmount,
-//   paid: loanPayment.paid + parseFloat(formData.paidAmount),
-//   remaining: (loanPayment.remaining || 0) - parseFloat(formData.paidAmount),
-//   details: formData.details,
-//   paymentDate: formData.date,
-//   status: "installment",
-// };
-
-// const customerPaymentData = {
-//   loanId: loanPayment.loanId,
-//   customerId: loanPayment.customerId,
-//   customerName: loanPayment.customerName,
-//   credit: parseFloat(formData.paidAmount),
-//   debit: (loanPayment.remaining || 0) - parseFloat(formData.paidAmount),
-//   details: formData.details,
-//   paymentDate: formData.date,
-//   status: "installment",
-// };
-
-// console.log("paid ", loanPayment.paid);
-// console.log("remaining ", loanPayment.remaining);
-
-// const updatePayment = {
-//   loanId: loanPayment.loanId,
-//   customerId: loanPayment.customerId,
-//   customerName: loanPayment.customerName,
-//   totalAmount: loanPayment.totalAmount,
-//   paid: loanPayment.paid + parseFloat(formData.paidAmount),
-//   remaining: loanPayment.remaining - parseFloat(formData.paidAmount),
-//   status: "loan",
-//   paymentDate: loanPayment.paymentDate,
-// };
-// await addCustomerPayment(customerPaymentData).unwrap();
-// await updateLoanPayment({ id, updatePayment });

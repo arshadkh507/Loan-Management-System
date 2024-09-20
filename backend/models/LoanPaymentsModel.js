@@ -54,3 +54,6 @@ const LoanPaymentSchema = new mongoose.Schema(
 const LoanPayment = mongoose.model("LoanPayment", LoanPaymentSchema);
 
 module.exports = LoanPayment;
+
+//Loan Payment with Status "loan": This represents the primary loan payment record.
+//Installment Payments with Status "installment": These represent partial payments or installments towards the loan.

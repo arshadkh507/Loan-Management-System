@@ -6,7 +6,10 @@ const {
   updateLoan,
   deleteLoan,
 } = require("../controllers/loanController");
-const { getCustomerLedger } = require("../controllers/loanReports");
+const {
+  getCustomerLedger,
+  getDashboardData,
+} = require("../controllers/loanReports");
 
 const router = express.Router();
 
@@ -18,5 +21,6 @@ router.get("/getSingle/:id", getLoanById);
 router.put("/update/:id", updateLoan);
 router.delete("/delete/:id", deleteLoan);
 router.get("/report/customer-ledger/:id", getCustomerLedger);
+router.get("/dashboard", getDashboardData);
 
 module.exports = router;

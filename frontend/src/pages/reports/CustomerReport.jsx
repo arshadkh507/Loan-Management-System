@@ -52,6 +52,7 @@ const CustomerReport = () => {
     currentPage * entriesToShow
   );
 
+  console.log(paginatedCustomers);
   // Handle Page Change
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -99,7 +100,7 @@ const CustomerReport = () => {
                 <th>Email</th>
                 <th>Phone Number</th>
                 <th>Total Loans</th>
-                <th>Total Loan Amount</th>
+                <th>Total Repayment Amount</th>
                 <th>Total Paid</th>
                 <th>Total Remaining</th>
                 <th>Address</th>

@@ -39,6 +39,9 @@ export const loanApi = createApi({
     getCustomerLedger: builder.query({
       query: (id) => `/report/customer-ledger/${id}`,
     }),
+    getDashboardData: builder.query({
+      query: () => "dashboard",
+    }),
   }),
 });
 
@@ -46,6 +49,7 @@ export const {
   useGetLoansQuery,
   useGetLoanByIdQuery,
   useGetCustomerLedgerQuery,
+  useGetDashboardDataQuery,
   useAddLoanMutation,
   useUpdateLoanMutation,
   useDeleteLoanMutation,

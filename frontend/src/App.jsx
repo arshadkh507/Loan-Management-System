@@ -112,7 +112,7 @@ function App() {
           path="/loan-payments/edit/:id"
           element={
             <Layout>
-              <LoanPaymentsDetails />
+              <AddLoanPayment />
             </Layout>
           }
         />

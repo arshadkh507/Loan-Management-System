@@ -6,6 +6,9 @@ import { useGetCustomerLedgerQuery, useGetLoansQuery } from "../../app/loanApi";
 import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 import "./customerLedger.css";
 import { useLocation } from "react-router-dom";
+import { useReactToPrint } from "react-to-print";
+import PrintCustomerLedger from "../printPages/PrintCustomerLedger";
+import { formatDate } from "../../../utils/dataFuction";
 
 const CustomerLedger = () => {
   const location = useLocation();
@@ -44,16 +47,16 @@ const CustomerLedger = () => {
   const handleCustomerChange = (selectedOption) => {
     setSelectedCustomer(selectedOption);
   };
-  const printArea = useRef(0);
-  const handlePrint = () => {
-    let originalContent = window.document.body.innerHTML;
-    const element = printArea.current;
-    let printContent = element.innerHTML;
-    document.body.innerHTML = printContent;
-    window.print();
-    document.body.innerHTML = originalContent;
-    window.location.reload();
-  };
+
+  // const handlePrint = () => {
+  //   let originalContent = window.document.body.innerHTML;
+  //   const element = printArea.current;
+  //   let printContent = element.innerHTML;
+  //   document.body.innerHTML = printContent;
+  //   window.print();
+  //   document.body.innerHTML = originalContent;
+  //   window.location.reload();
+  // };
 
   const customerOptions = loans.reduce((acc, loan) => {
     if (!acc.some((options) => options.value === loan.customerId)) {
@@ -94,7 +97,12 @@ const CustomerLedger = () => {
       totalLoans,
     };
   }, [customerLedgerData.loans]);
+  const printArea = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => printArea.current,
+  });
 
+  console.log(customer.createdAt);
   return (
     <div className="page-container" id="print_area" ref={printArea}>
       <h1 className="page-heading">Customer Ledger</h1>
@@ -131,37 +139,49 @@ const CustomerLedger = () => {
 
         {selectedCustomer && customerLedgerData ? (
           <div>
-            <h2 className="heading-2">Customer Details</h2>
-            <Table responsive className="customer-ledger-details">
-              <tbody>
-                <tr>
-                  <th>Full Name</th>
-                  <td>{customer.fullName}</td>
-                </tr>
-                <tr>
-                  <th>Email</th>
-                  <td>{customer.email}</td>
-                </tr>
-                <tr>
-                  <th>Phone Number</th>
-                  <td>{customer.phoneNumber}</td>
-                </tr>
-                <tr>
-                  <th>Address</th>
-                  <td>{customer.address}</td>
-                </tr>
-                <tr>
-                  <th>Created At</th>
-                  <td>{new Date(customer.createdAt).toLocaleDateString()}</td>
-                </tr>
-                {customer.additionalInfo && (
-                  <tr>
-                    <th>Additional Info</th>
-                    <td>{customer.additionalInfo}</td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
+            <h2 className="heading-2 print-not-show">Customer Details</h2>
+            <Row className="my-3 g-2">
+              <Col xs={6} md={2}>
+                <strong>Full Name:</strong>
+              </Col>
+              <Col xs={6} md={4}>
+                {customer.fullName}
+              </Col>
+              <Col xs={6} md={2}>
+                <strong>Email:</strong>
+              </Col>
+              <Col xs={6} md={4}>
+                {customer.email}
+              </Col>
+              <Col xs={6} md={2}>
+                <strong>Phone Number:</strong>
+              </Col>
+              <Col xs={6} md={4}>
+                {customer.phoneNumber}
+              </Col>
+              <Col xs={6} md={2}>
+                <strong>Address:</strong>
+              </Col>
+              <Col xs={6} md={4}>
+                {customer.address}
+              </Col>
+              <Col xs={6} md={2}>
+                <strong>Created At:</strong>
+              </Col>
+              <Col xs={6} md={4}>
+                {formatDate(customer.createdAt)}
+              </Col>
+              {customer.additionalInfo && (
+                <>
+                  <Col xs={6} md={2}>
+                    <strong>Additional Info:</strong>
+                  </Col>
+                  <Col xs={6} md={4}>
+                    {customer.additionalInfo}
+                  </Col>
+                </>
+              )}
+            </Row>
 
             <hr className="custom-hr" />
 
@@ -203,32 +223,38 @@ const CustomerLedger = () => {
                   Loan {index + 1} Payments
                 </h4> */}
                 {/* PAYMENTS TABLE */}
-                <Table responsive bordered hover>
-                  <thead>
-                    <tr>
-                      <th>S. No</th>
-                      <th>Total Repayment</th>
-                      <th>Paid</th>
-                      <th>Remaining</th>
-                      <th>Payment Date</th>
-                      <th>Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loan.installmentPayments.map((payment, idx) => (
-                      <tr key={payment._id}>
-                        <td>{idx + 1}</td>
-                        <td>{payment.totalRepayment}</td>
-                        <td>{payment.credit}</td>
-                        <td>{payment.debit}</td>
-                        <td>
-                          {new Date(payment.paymentDate).toLocaleDateString()}
-                        </td>
-                        <td>{payment.details}</td>
+                {loan.installmentPayments?.length > 0 ? (
+                  <Table responsive bordered hover>
+                    <thead>
+                      <tr>
+                        <th>S. No</th>
+                        <th>Total Repayment</th>
+                        <th>Paid</th>
+                        <th>Remaining</th>
+                        <th>Payment Date</th>
+                        <th>Details</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </Table>
+                    </thead>
+                    <tbody>
+                      {loan.installmentPayments.map((payment, idx) => (
+                        <tr key={payment._id}>
+                          <td>{idx + 1}</td>
+                          <td>{payment.totalRepayment}</td>
+                          <td>{payment.credit}</td>
+                          <td>{payment.debit}</td>
+                          <td>
+                            {new Date(payment.paymentDate).toLocaleDateString()}
+                          </td>
+                          <td>{payment.details}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                ) : (
+                  <Alert variant="secondary">
+                    The customer have no payments for this loan.
+                  </Alert>
+                )}
                 {index + 1 < customerLedgerData.loans?.length && (
                   <hr className="custom-hr" />
                 )}

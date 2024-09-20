@@ -25,8 +25,8 @@ export const loanPaymentApi = createApi({
       invalidatesTags: ["Loans"],
     }),
     updateLoanPayment: builder.mutation({
-      query: ({ id, ...updatedLoanPayment }) => ({
-        url: `/update/${id}`,
+      query: (updatedLoanPayment) => ({
+        url: `/update/${updatedLoanPayment.paymentId}`,
         method: "PUT",
         body: updatedLoanPayment,
       }),

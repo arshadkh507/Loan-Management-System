@@ -116,7 +116,7 @@ const getCustomerReport = async (req, res) => {
         // Calculate total loans and loan amount
         const totalLoans = loans.length;
         const totalLoanAmount = loans.reduce(
-          (sum, loan) => sum + loan.loanAmount,
+          (sum, loan) => sum + loan.totalRepayment,
           0
         );
 

@@ -75,9 +75,9 @@ const LoanPaymentsDetails = () => {
         await deleteLoanPayment(id).unwrap();
         SuccessAlert({
           title: "Deleted!",
-          text: "The loan payment has been deleted.",
+          text: "The loan payment and corresponding records have been deleted.",
         });
-        refetch(); // Refetch the loan payments list
+        refetch();
       } catch (error) {
         ErrorAlert({
           title: "Error",
@@ -88,7 +88,7 @@ const LoanPaymentsDetails = () => {
   };
 
   const handleEditPayment = (id) => {
-    navigate(`/loan-payments/edit/${id}`); // Navigate to edit page with ID
+    navigate(`/loan-payments/edit/${id}`);
   };
 
   return (

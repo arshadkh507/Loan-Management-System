@@ -32,6 +32,7 @@ const LoanPayment = () => {
     data: allCustomerPayments = [],
     isLoading: paymentsLoading,
     isError: paymentsError,
+    refetch: refetchCustomerPayments,
   } = useGetCustomerPaymentsQuery(
     selectedCustomer ? selectedCustomer.value : null
   );
@@ -47,8 +48,9 @@ const LoanPayment = () => {
   useEffect(() => {
     if (selectedCustomer || location) {
       refetch();
+      refetchCustomerPayments();
     }
-  }, [location, refetch, selectedCustomer]);
+  }, [location, refetch, selectedCustomer, refetchCustomerPayments]);
 
   useEffect(() => {
     if (selectedCustomer) {
@@ -157,6 +159,7 @@ const LoanPayment = () => {
                     <h2>{selectedCustomer?.label}</h2>
                     <div className="loan-details-list">
                       {loanPaymentsWithDetails.map((loan, index) => (
+                        // loan.remaining > 0 &&
                         <CustomerLoanItem
                           key={loan.loanId}
                           loan={loan}
