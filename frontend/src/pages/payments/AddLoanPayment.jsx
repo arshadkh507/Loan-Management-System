@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useAddCustomerPaymentMutation } from "../../app/customerPaymentApi";
 import {
   useCreateLoanPaymentMutation,
+  useGetLoanPaymentAndLoanByIdQuery,
   useGetLoanPaymentByIdQuery,
   useUpdateLoanPaymentMutation,
 } from "../../app/loanPaymentApi";
@@ -32,23 +33,16 @@ const AddLoanPayment = () => {
   // Determine if this is edit or add mode
   const isEditMode = location.pathname.includes("/edit");
 
-  // Fetch loan payment if in edit mode
   const {
-    data: loanPayment,
-    error: fetchError,
-    isLoading: isLoanPaymentLoading,
-    isError: isLoanPaymentsError,
+    data: loanAndPayment = [],
+    error: loanAndPaymentError,
+    isLoading: isLoanAndPaymentLoading,
+    isError: isLoanAndPaymentError,
     refetch,
-  } = useGetLoanPaymentByIdQuery(id);
+  } = useGetLoanPaymentAndLoanByIdQuery(id);
 
-  console.log(loanPayment);
-  const {
-    data: singleLoan,
-    error: loanError,
-    isLoading: isLoanLoading,
-    isError: isLoanError,
-  } = useGetLoanByIdQuery(loanPayment ? loanPayment.loanId : null);
-  console.log(singleLoan);
+  console.log("loanAndPayment: ", loanAndPayment);
+
   const [formData, setFormData] = useState({
     paidAmount: "",
     details: "",
@@ -68,18 +62,24 @@ const AddLoanPayment = () => {
     useUpdateLoanPaymentMutation();
 
   useEffect(() => {
-    if (loanPayment && isEditMode) {
-      // Pre-fill form data in edit mode
-      const formattedDate = new Date(loanPayment.paymentDate)
-        .toISOString()
-        .split("T")[0];
+    if (loanAndPayment && isEditMode) {
+      console.log("loanAndPayment  ", loanAndPayment);
+
+      // Handle unset values using optional chaining and fallback values
+      const paymentDate =
+        loanAndPayment?.loanPayment?.paymentDate || getTodayDate();
+
+      // Ensure all necessary properties are available, otherwise use empty strings or default values
+      const paidAmount = loanAndPayment?.loanPayment?.paid || "";
+      const details = loanAndPayment?.loanPayment?.details || "";
+
       setFormData({
-        paidAmount: loanPayment.paid || "",
-        details: loanPayment.details || "",
-        date: formattedDate || getTodayDate(),
+        paidAmount,
+        details,
+        date: paymentDate.split("T")[0], // Split to get the date part
       });
     }
-  }, [loanPayment, isEditMode]);
+  }, [loanAndPayment, isEditMode]);
 
   const handleChange = (e) => {
     setFormData({
@@ -90,11 +90,19 @@ const AddLoanPayment = () => {
 
   const validateForm = () => {
     const paidAmount = parseFloat(formData.paidAmount);
-    return (
-      !isNaN(paidAmount) &&
-      paidAmount > 0 &&
-      paidAmount <= (loanPayment?.totalAmount || 0)
-    );
+
+    // Check if the amount is a valid number, greater than 0, and doesn't exceed the previous amount
+    if (isNaN(paidAmount) || paidAmount <= 0) {
+      ErrorAlert({ text: "Paid amount must be a positive number." });
+      return false;
+    }
+
+    if (paidAmount > previousAmount) {
+      ErrorAlert({ text: "Paid amount cannot exceed the previous amount." });
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
@@ -103,13 +111,11 @@ const AddLoanPayment = () => {
       ErrorAlert({ text: "Invalid payment amount." });
       return;
     }
-
     const loanPaymentData = {
       paymentId: id,
-      loanId: loanPayment.loanId,
-      customerId: loanPayment.customerId,
-      customerName: loanPayment.customerName,
-      totalAmount: loanPayment.totalAmount,
+      loanId: loanAndPayment.loanPayment.loanId._id,
+      customerId: loanAndPayment.loanPayment.customerId._id,
+      totalAmount: loanAndPayment.loanPayment.totalAmount,
       paidAmount: parseFloat(formData.paidAmount),
       details: formData.details,
       paymentDate: formData.date,
@@ -137,12 +143,14 @@ const AddLoanPayment = () => {
   };
 
   const previousAmount = isEditMode
-    ? loanPayment?.remaining + loanPayment?.paid || 0 // Use 0 if loanPayment is missing
-    : loanPayment?.remaining || 0;
+    ? (loanAndPayment?.statusLoanPayment?.remaining || 0) +
+      (loanAndPayment?.loanPayment?.paid || 0)
+    : loanAndPayment?.loanPayment?.remaining || 0;
+
   const paidAmount = parseFloat(formData.paidAmount) || 0;
   const remainingAmount = previousAmount - paidAmount;
 
-  const loading = isLoanPaymentLoading || isLoanLoading;
+  const loading = isLoanAndPaymentLoading;
   const processingLoading = isCreatingLoanPayment || isUpdatingLoanPayment;
 
   return (
@@ -155,21 +163,14 @@ const AddLoanPayment = () => {
 
       {loading && <LoadingSpinner />}
 
-      {isLoanPaymentError ||
-        (isLoanPaymentsError && (
-          <Alert variant="danger">
-            {fetchError?.data?.message ||
-              "Failed to load loan payment details."}
-          </Alert>
-        ))}
-
-      {isLoanPaymentError && (
+      {isLoanAndPaymentError && (
         <Alert variant="danger">
-          {loanPaymentError?.data?.message || "Failed to add loan payment."}
+          {loanAndPaymentError?.data?.message ||
+            "Failed to load loan payment details."}
         </Alert>
       )}
 
-      {loanPayment && (
+      {loanAndPayment && (
         <Form onSubmit={handleSubmit}>
           <Row className="align-items-end">
             <Col md={4} lg={3} sm={6}>
@@ -177,7 +178,7 @@ const AddLoanPayment = () => {
                 <Form.Label>Customer Name</Form.Label>
                 <Form.Control
                   type="text"
-                  value={loanPayment.customerName}
+                  value={loanAndPayment.loanPayment?.customerId.fullName}
                   disabled
                 />
               </Form.Group>
@@ -200,7 +201,7 @@ const AddLoanPayment = () => {
                 <Form.Label>Monthly Repayment</Form.Label>
                 <Form.Control
                   type="text"
-                  value={singleLoan?.monthlyRepayment || "N/A"}
+                  value={loanAndPayment?.loanPayment?.loanId?.monthlyRepayment}
                   disabled
                 />
               </Form.Group>
@@ -209,11 +210,7 @@ const AddLoanPayment = () => {
             <Col md={4} lg={3} sm={6}>
               <Form.Group controlId="previousAmount">
                 <Form.Label>Previous Amount</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={loanPayment.remaining}
-                  disabled
-                />
+                <Form.Control type="text" value={previousAmount} disabled />
               </Form.Group>
             </Col>
 

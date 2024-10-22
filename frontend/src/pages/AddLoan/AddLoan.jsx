@@ -13,19 +13,15 @@ import {
   useGetLoanByIdQuery,
   useUpdateLoanMutation,
 } from "../../app/loanApi";
-import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
-import { useNavigate, useParams } from "react-router-dom";
-
-// Helper function to get today's date in 'YYYY-MM-DD' format
-const getTodayDate = () => {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
-};
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { getTodayDate } from "../../utils/dataFuction";
 
 const AddLoan = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const [isEditMode, setIsEditMode] = useState(false);
+
   const [loanDetails, setLoanDetails] = useState({
     loanAmount: "",
     interestRate: "",
@@ -34,26 +30,96 @@ const AddLoan = () => {
     endDate: "",
     additionalInfo: "",
     customer: null,
+    totalRepayment: "", // Add totalRepayment here
+    monthlyRepayment: "", // Add monthlyRepayment here
   });
-
-  const [totalRepayment, setTotalRepayment] = useState("");
-  const [monthlyRepayment, setMonthlyRepayment] = useState("");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
   const {
     data: customers = [],
     isLoading: customersLoading,
     isError: customersError,
   } = useGetCustomersQuery();
 
-  const [addLoan] = useAddLoanMutation();
-  const [updateLoan] = useUpdateLoanMutation();
+  const [error, setError] = useState(null);
 
-  // Fetch loan details if in edit mode
+  const [addLoan, { isLoading: isAdding }] = useAddLoanMutation();
+  const [updateLoan, { isLoading: isUpdating }] = useUpdateLoanMutation();
+
   const { data: loanData, isLoading: loanLoading } = useGetLoanByIdQuery(id, {
-    skip: !id, // Skip the query if there's no ID (meaning it's an Add mode)
+    skip: !id,
   });
+
+  useEffect(() => {
+    if (!location.pathname.includes("/edit")) {
+      setLoanDetails({
+        loanAmount: "",
+        interestRate: "",
+        duration: "",
+        startDate: getTodayDate(),
+        endDate: "",
+        additionalInfo: "",
+        customer: null,
+        totalRepayment: "",
+        monthlyRepayment: "",
+      });
+      setIsEditMode(false);
+    }
+  }, [id, location.pathname]);
+
+  // Effect to calculate totalRepayment
+  useEffect(() => {
+    if (loanDetails.loanAmount && loanDetails.interestRate) {
+      const principal = parseFloat(loanDetails.loanAmount);
+      const rate = parseFloat(loanDetails.interestRate) / 100;
+      const total = principal * (1 + rate);
+
+      // Update totalRepayment in loanDetails state
+      setLoanDetails((prevDetails) => ({
+        ...prevDetails,
+        totalRepayment: total.toFixed(2),
+      }));
+    } else {
+      setLoanDetails((prevDetails) => ({
+        ...prevDetails,
+        totalRepayment: "",
+      }));
+    }
+  }, [loanDetails.loanAmount, loanDetails.interestRate]);
+
+  // Effect to calculate monthlyRepayment
+  useEffect(() => {
+    if (loanDetails.totalRepayment && loanDetails.duration) {
+      const months = parseFloat(loanDetails.duration);
+      const monthly = parseFloat(loanDetails.totalRepayment) / months;
+
+      // Update monthlyRepayment in loanDetails state
+      setLoanDetails((prevDetails) => ({
+        ...prevDetails,
+        monthlyRepayment: monthly.toFixed(2),
+      }));
+    } else {
+      setLoanDetails((prevDetails) => ({
+        ...prevDetails,
+        monthlyRepayment: "",
+      }));
+    }
+  }, [loanDetails.totalRepayment, loanDetails.duration]);
+
+  // Effect to calculate endDate
+  useEffect(() => {
+    if (loanDetails.startDate && loanDetails.duration) {
+      const startDate = new Date(loanDetails.startDate);
+      const durationMonths = parseInt(loanDetails.duration, 10);
+      const endDate = new Date(
+        startDate.setMonth(startDate.getMonth() + durationMonths)
+      );
+
+      // Update endDate in loanDetails state
+      setLoanDetails((prevDetails) => ({
+        ...prevDetails,
+        endDate: endDate.toISOString().split("T")[0],
+      }));
+    }
+  }, [loanDetails.startDate, loanDetails.duration]);
 
   // Effect to check if we're in edit mode and populate the form
   useEffect(() => {
@@ -61,71 +127,44 @@ const AddLoan = () => {
       setIsEditMode(true);
     }
     if (loanData) {
-      setLoanDetails({
+      console.log("Loan loanData: ", loanData);
+      setLoanDetails(() => ({
         loanAmount: loanData.loanAmount,
         interestRate: loanData.interestRate,
         duration: loanData.duration,
-        startDate: loanData.startDate.split("T")[0], // Ensure proper date format
+        startDate: loanData.startDate.split("T")[0],
         endDate: loanData.endDate.split("T")[0],
-        additionalInfo: loanData.additionalInfo,
+        additionalInfo: loanData.additionalInfo || "",
         customer: {
-          value: loanData.customerId,
-          label: loanData.customerName,
+          value: loanData.customerId._id,
+          lable: loanData.customerId.fullName,
         },
-      });
+        totalRepayment: loanData.totalRepayment.toFixed(2),
+        monthlyRepayment: loanData.monthlyRepayment.toFixed(2),
+      }));
     }
   }, [id, loanData]);
 
-  useEffect(() => {
-    if (
-      loanDetails.loanAmount &&
-      loanDetails.interestRate &&
-      loanDetails.duration
-    ) {
-      const principal = parseFloat(loanDetails.loanAmount);
-      const rate = parseFloat(loanDetails.interestRate) / 100;
-      const months = parseFloat(loanDetails.duration);
-      const total = principal * (1 + rate);
-      const monthly = total / months;
-
-      setTotalRepayment(total.toFixed(2));
-      setMonthlyRepayment(monthly.toFixed(2));
-    } else {
-      setTotalRepayment("");
-      setMonthlyRepayment("");
-    }
-
-    if (loanDetails.startDate && loanDetails.duration) {
-      const startDate = new Date(loanDetails.startDate);
-      const durationMonths = parseInt(loanDetails.duration, 10);
-      const endDate = new Date(
-        startDate.setMonth(startDate.getMonth() + durationMonths)
-      );
-      setLoanDetails((prevDetails) => ({
-        ...prevDetails,
-        endDate: endDate.toISOString().split("T")[0],
-      }));
-    }
-  }, [
-    loanDetails.loanAmount,
-    loanDetails.interestRate,
-    loanDetails.duration,
-    loanDetails.startDate,
-  ]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setLoanDetails({ ...loanDetails, [name]: value });
+    console.log("name , value ", name, " ", value);
+    setLoanDetails({ ...loanDetails, [name]: value || "" });
   };
 
   const handleCustomerChange = (selectedOption) => {
-    setLoanDetails({ ...loanDetails, customer: selectedOption });
+    console.log(selectedOption);
+    setLoanDetails({ ...loanDetails, customer: selectedOption || null });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const isCustomerValid = loanDetails.customer && loanDetails.customer.value;
+
+    if (parseFloat(loanDetails.duration) <= 0) {
+      setError("Duration must be greater than zero.");
+      return;
+    }
 
     if (
       loanDetails.loanAmount &&
@@ -135,45 +174,52 @@ const AddLoan = () => {
       loanDetails.endDate &&
       isCustomerValid
     ) {
-      setLoading(true);
       try {
         if (isEditMode) {
           // Edit mode: Update loan
+          console.log("what i am sending to edit code: ", {
+            id,
+            ...loanDetails,
+          });
+
           await updateLoan({
             id,
             ...loanDetails,
-            totalRepayment,
-            monthlyRepayment,
           }).unwrap();
           SuccessAlert({ text: "The loan was updated successfully." });
         } else {
           // Add mode: Create new loan
           await addLoan({
             ...loanDetails,
-            totalRepayment,
-            monthlyRepayment,
           }).unwrap();
           SuccessAlert({ text: "The loan was added successfully." });
         }
         navigate("/loans/details");
+        setLoanDetails({
+          loanAmount: "",
+          interestRate: "",
+          duration: "",
+          startDate: getTodayDate(),
+          endDate: "",
+          additionalInfo: "",
+          customer: null,
+          totalRepayment: "",
+          monthlyRepayment: "",
+        });
       } catch (err) {
+        console.error("Error adding loan:", err); // Log the full error object
         ErrorAlert({
           title: `Failed to ${isEditMode ? "Update" : "Add"} Loan`,
-          text: `Please try again later. ${err.message}`,
+          text: `Please try again later. ${
+            err?.data?.error || err.message || "Unknown error"
+          }`, // Access the error message safely
         });
+        setError(
+          `Failed to ${isEditMode ? "update" : "add"} loan: ${
+            err?.data?.error || err.message || "Unknown error"
+          }`
+        );
       }
-      setLoading(false);
-      setLoanDetails({
-        loanAmount: "",
-        interestRate: "",
-        duration: "",
-        startDate: getTodayDate(),
-        endDate: "",
-        additionalInfo: "",
-        customer: null,
-      });
-      setTotalRepayment("");
-      setMonthlyRepayment("");
       setError(null);
     } else {
       setError("All fields are required");
@@ -183,6 +229,8 @@ const AddLoan = () => {
     value: customer._id,
     label: customer.fullName,
   }));
+
+  const loading = isAdding || isUpdating;
 
   return (
     <div className="page-container">
@@ -195,14 +243,15 @@ const AddLoan = () => {
             <Form.Group controlId="formCustomer">
               <Form.Label>Customer Name</Form.Label>
               {isEditMode ? (
-                // Show a non-editable field in edit mode
                 <Form.Control
                   type="text"
-                  value={loanDetails.customer?.label || ""}
+                  value={
+                    loanDetails?.customer?.lable ||
+                    loanData?.customerId.fullName ||
+                    ""
+                  }
                   disabled
                 />
-              ) : customersLoading ? (
-                <LoadingSpinner />
               ) : (
                 <Select
                   name="customer"
@@ -211,6 +260,7 @@ const AddLoan = () => {
                   options={customerOptions}
                   placeholder="Select customer"
                   required
+                  isLoading={customersLoading}
                 />
               )}
               {customersError && (
@@ -225,7 +275,7 @@ const AddLoan = () => {
               <Form.Control
                 type="number"
                 name="loanAmount"
-                value={loanDetails.loanAmount}
+                value={loanDetails.loanAmount || ""}
                 onChange={handleChange}
                 placeholder="Enter loan amount"
                 required
@@ -247,6 +297,18 @@ const AddLoan = () => {
             </Form.Group>
           </Col>
 
+          <Col sm={4} md={3}>
+            <Form.Group controlId="formTotalRepayment">
+              <Form.Label>Total Repayment</Form.Label>
+              <Form.Control
+                type="text"
+                value={loanDetails.totalRepayment}
+                placeholder="Total repayment with interest"
+                disabled
+              />
+            </Form.Group>
+          </Col>
+
           <Col sm={3} md={3}>
             <Form.Group controlId="formDuration">
               <Form.Label>Duration (Months)</Form.Label>
@@ -262,23 +324,11 @@ const AddLoan = () => {
           </Col>
 
           <Col sm={4} md={3}>
-            <Form.Group controlId="formTotalRepayment">
-              <Form.Label>Total Repayment</Form.Label>
-              <Form.Control
-                type="text"
-                value={totalRepayment}
-                placeholder="Total repayment with interest"
-                disabled
-              />
-            </Form.Group>
-          </Col>
-
-          <Col sm={4} md={3}>
             <Form.Group controlId="formMonthlyRepayment">
               <Form.Label>Monthly Repayment</Form.Label>
               <Form.Control
                 type="text"
-                value={monthlyRepayment}
+                value={loanDetails.monthlyRepayment}
                 placeholder="Monthly repayment amount"
                 disabled
               />

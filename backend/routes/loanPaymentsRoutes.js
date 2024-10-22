@@ -19,4 +19,9 @@ router.delete("/delete/:id", loanPaymentController.deleteLoanPayment);
 
 router.get("/report", loanPaymentController.getLoanPaymentReport);
 
+router.get(
+  "/loan-payment-and-loan/:id",
+  loanPaymentController.getLoanPaymentAndLoanById
+);
+
 module.exports = router;

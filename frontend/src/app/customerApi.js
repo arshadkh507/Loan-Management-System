@@ -1,8 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+// Access the backend API base URL from environment variables
+const backendBaseUrl = import.meta.env.VITE_LMS_BACKEND_API_BASE_URL;
 export const api = createApi({
   reducerPath: "customerApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000/api/customers" }),
+  baseQuery: fetchBaseQuery({ baseUrl: `${backendBaseUrl}/api/customers` }),
   endpoints: (builder) => ({
     getCustomers: builder.query({
       query: () => "/getAll",

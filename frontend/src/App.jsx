@@ -1,4 +1,3 @@
-// src/App.js
 import { Routes, Route } from "react-router-dom";
 import NotFound from "./components/NotFound/NotFound";
 import Layout from "./layout/Layout";
@@ -14,6 +13,12 @@ import CustomerReport from "./pages/reports/CustomerReport";
 import LoanReport from "./pages/reports/loanReport";
 import SingleCustomerReport from "./pages/reports/SingleCustomerReport";
 import CustomerLedger from "./pages/reports/CustomerLedger";
+import LoanSummary from "./pages/LoanSummary/LoanSummary";
+import CustomerLoanSummary from "./pages/LoanSummary/CustomerLoanSummary";
+
+// Get the base URL from environment variables
+const frontendBaseUrl = import.meta.env.VITE_LMS_FRONTEND_BASE_URL;
+console.log(frontendBaseUrl);
 
 function App() {
   return (
@@ -59,7 +64,6 @@ function App() {
             </Layout>
           }
         />
-        {/* Route for editing a customer */}
         <Route
           path="/customers/edit/:id"
           element={
@@ -156,7 +160,22 @@ function App() {
             </Layout>
           }
         />
-
+        <Route
+          path="/loan-summary"
+          element={
+            <Layout>
+              <LoanSummary />
+            </Layout>
+          }
+        />
+        <Route
+          path="/loan-summary/single-customer-summary"
+          element={
+            <Layout>
+              <CustomerLoanSummary />
+            </Layout>
+          }
+        />
         <Route
           path="*"
           element={

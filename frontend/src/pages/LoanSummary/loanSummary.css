@@ -1,0 +1,22 @@
+@media print {
+  .print-not-show {
+    display: none;
+  }
+
+  .page-heading:first-child {
+    margin-top: 10px;
+    text-align: center;
+  }
+  table {
+    page-break-inside: auto;
+    width: 100%;
+  }
+}
+
+.customer-ledger-details tbody tr,
+.customer-ledger-details tbody tr td,
+.customer-ledger-details tbody tr th {
+  border-color: inherit;
+  border-style: none !important;
+  border-width: 0 !important;
+}

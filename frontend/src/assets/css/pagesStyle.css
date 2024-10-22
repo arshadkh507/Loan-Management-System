@@ -102,3 +102,12 @@ table {
 .report-total {
   text-align: right;
 }
+
+@media only print {
+  #pagination {
+    display: none;
+  }
+  #search-bar-and-filter {
+    display: none;
+  }
+}

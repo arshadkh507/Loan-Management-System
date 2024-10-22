@@ -1,6 +1,6 @@
 const LoanPayment = require("../models/LoanPaymentsModel");
-const LoanModel = require("../models/LoanModel"); // Import Loan Model
 const CustomerPayment = require("../models/customerPaymentModel");
+const Loan = require("../models/LoanModel");
 
 // Create a new loan payment and update the loan amounts
 exports.createLoanPayment = async (req, res) => {
@@ -9,7 +9,6 @@ exports.createLoanPayment = async (req, res) => {
       paymentId,
       loanId,
       customerId,
-      customerName,
       totalAmount,
       paidAmount,
       details,
@@ -27,7 +26,6 @@ exports.createLoanPayment = async (req, res) => {
     const newLoanPayment = new LoanPayment({
       loanId,
       customerId,
-      customerName,
       totalAmount: totalAmount,
       paid: parseFloat(paidAmount),
       remaining: newRemainingAmount,
@@ -42,7 +40,7 @@ exports.createLoanPayment = async (req, res) => {
     const newCustomerPayment = new CustomerPayment({
       loanId,
       customerId,
-      customerName,
+      loanPaymentId: savedLoanPayment._id,
       credit: parseFloat(paidAmount),
       debit: newRemainingAmount,
       details,
@@ -79,7 +77,10 @@ exports.createLoanPayment = async (req, res) => {
 // Get all loan payments
 exports.getAllLoanPayments = async (req, res) => {
   try {
-    const loanPayments = await LoanPayment.find().sort({ createdAt: -1 });
+    const loanPayments = await LoanPayment.find()
+      .populate("customerId")
+      .populate("loanId")
+      .sort({ createdAt: -1 });
     res.status(200).json(loanPayments);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -96,6 +97,47 @@ exports.getLoanPaymentById = async (req, res) => {
     res.status(200).json(loanPayment);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Controller to fetch loan payment and loan details together
+exports.getLoanPaymentAndLoanById = async (req, res) => {
+  const { id } = req.params; // Loan Payment ID
+
+  try {
+    // Fetch the loan payment by ID, populate loan and customer data
+    const loanPayment = await LoanPayment.findById(id)
+      .populate("loanId")
+      .populate("customerId");
+
+    // If loanPayment is not found
+    if (!loanPayment) {
+      return res.status(404).json({ error: "Loan payment not found" });
+    }
+
+    // Fetch another loan payment with the same loanId, customerId, and status "loan"
+    const anotherLoanPayment = await LoanPayment.findOne({
+      loanId: loanPayment.loanId,
+      customerId: loanPayment.customerId,
+      status: "loan",
+    });
+
+    // If no loan payment with status 'loan' is found
+    if (!anotherLoanPayment) {
+      return res
+        .status(404)
+        .json({ error: "Loan payment with status 'loan' not found" });
+    }
+
+    // Combine and send both in a structured response
+    return res.status(200).json({
+      loanPayment: {
+        ...loanPayment._doc,
+      },
+      statusLoanPayment: anotherLoanPayment._doc, // Payment with status 'loan'
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -133,6 +175,11 @@ exports.updateLoanPayment = async (req, res) => {
       loanId,
       status: "loan",
     });
+
+    console.log(
+      "loanPaymentStatusLoan.remaining: ",
+      loanPaymentStatusLoan.remaining
+    );
 
     // Calculate the new paid and remaining amounts for the installment being edited
     const newPaidAmount = parseFloat(paidAmount);
@@ -217,7 +264,16 @@ exports.updateLoanPayment = async (req, res) => {
     }
 
     console.log("Updated main loan payment: ", updatedLoan);
-
+    // Optionally, update related `CustomerPayment` record
+    await CustomerPayment.updateOne(
+      { loanPaymentId: req.params.id }, // Find the customer payment by loanPaymentId
+      {
+        credit: newPaidAmount,
+        debit: totalRemainingAmount,
+        details,
+        paymentDate,
+      }
+    );
     res.status(200).json(updatedInstallment);
   } catch (error) {
     console.error("Error updating loan payment: ", error);
@@ -300,6 +356,7 @@ exports.updateLoanPayment = async (req, res) => {
 // Delete a loan payment
 exports.deleteLoanPayment = async (req, res) => {
   try {
+    console.log(req.params.id);
     const loanPayment = await LoanPayment.findById(req.params.id);
     if (!loanPayment || loanPayment.status !== "installment") {
       return res
@@ -309,15 +366,21 @@ exports.deleteLoanPayment = async (req, res) => {
 
     // Find the corresponding customer payment to delete
     const customerPayment = await CustomerPayment.findOne({
-      loanId: loanPayment.loanId,
-      customerId: loanPayment.customerId,
-      status: "installment",
-      credit: loanPayment.paid,
+      loanPaymentId: req.params.id,
     });
 
     if (!customerPayment) {
       return res.status(404).json({ message: "Customer Payment not found" });
     }
+
+    const loanPayments = await LoanPayment.find({
+      loanId: loanPayment.loanId,
+      status: "installment",
+    }).sort({ paymentDate: 1 });
+
+    // will check later
+    // Check if the payment to delete is the last installment
+    const isLastPayment = loanPayments.length === 1;
 
     // Find the original loan record and update its previous paid and remaining amounts
     const loan = await LoanPayment.findOne({
@@ -329,24 +392,87 @@ exports.deleteLoanPayment = async (req, res) => {
       return res.status(404).json({ message: "Original loan not found" });
     }
 
-    // Revert the paid and remaining amounts
-    loan.paid -= loanPayment.paid; // Subtract the paid amount from the original loan
-    loan.remaining += loanPayment.paid; // Add the paid amount back to the remaining
+    if (isLastPayment) {
+      // Revert the paid and remaining amounts
+      loan.paid -= loanPayment.paid; // Subtract the paid amount from the original loan
+      loan.remaining += loanPayment.paid; // Add the paid amount back to the remaining
 
-    // Save the reverted loan amounts
-    await loan.save();
+      // Save the reverted loan amounts
+      await loan.save();
 
-    // Delete the loan payment with status "installment"
-    await LoanPayment.findByIdAndDelete(req.params.id);
+      // If this is the last payment, delete both loanPayment and customerPayment
+      await LoanPayment.findByIdAndDelete(req.params.id);
+      await CustomerPayment.findByIdAndDelete(customerPayment._id);
 
-    // Delete the corresponding customer payment
-    await CustomerPayment.findByIdAndDelete(customerPayment._id);
+      res.status(200).json({
+        message: "Loan Payment and Customer Payment deleted successfully.",
+      });
+    } else {
+      // If not the last payment, get the paid amount
+      const paidAmount = loanPayment.paid;
 
-    res.status(200).json({
-      message:
-        "Loan Payment and Customer Payment deleted, loan updated successfully",
-    });
+      const loanPayments = await LoanPayment.find({
+        loanId: loanPayment.loanId,
+        status: "installment",
+      }).sort({ paymentDate: 1 });
+
+      // Find the index of the payment to delete
+      const paymentIndex = loanPayments.findIndex(
+        (payment) => payment._id.toString() === req.params.id
+      );
+
+      if (paymentIndex === -1) {
+        return res.status(404).json({ message: "Loan payment not found." });
+      }
+
+      // Loop through the subsequent payments and adjust their remaining amounts
+      for (let i = paymentIndex + 1; i < loanPayments.length; i++) {
+        const payment = loanPayments[i];
+        payment.remaining += paidAmount; // Add back the paid amount to remaining
+
+        // Find the corresponding customer payment for the current loan payment
+        const customerPayment = await CustomerPayment.findOne({
+          loanPaymentId: payment._id,
+        });
+        // Ensure the customer payment exists before updating
+        if (customerPayment) {
+          customerPayment.debit += paidAmount; // Update the debit amount
+          await customerPayment.save(); // Save the updated customer payment
+        }
+
+        await payment.save(); // Save updated payment
+      }
+
+      // Loop through the subsequent payments and adjust their remaining amounts
+      // const subsequentPayments = loanPayments.filter(
+      //   (payment) => payment.paymentDate > loanPayment.paymentDate
+      // );
+
+      // for (const payment of subsequentPayments) {
+      //   payment.remaining += paidAmount;
+      //   await payment.save();
+      // }
+
+      // Revert the paid and remaining amounts
+      loan.paid -= loanPayment.paid; // Subtract the paid amount from the original loan
+      loan.remaining += loanPayment.paid; // Add the paid amount back to the remaining
+
+      // Save the reverted loan amounts
+      await loan.save();
+
+      // Delete the loan payment with status "installment"
+      await LoanPayment.findByIdAndDelete(req.params.id);
+
+      // Delete the corresponding customer payment
+      await CustomerPayment.findByIdAndDelete(customerPayment._id);
+
+      res.status(200).json({
+        message:
+          "Loan Payment deleted and subsequent payments updated successfully.",
+      });
+    }
   } catch (error) {
+    console.log("error: ", error);
     res.status(500).json({ message: error.message });
   }
 };

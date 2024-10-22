@@ -1,10 +1,13 @@
 // src/app/loanPaymentApi.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+// Access the backend API base URL from environment variables
+const backendBaseUrl = import.meta.env.VITE_LMS_BACKEND_API_BASE_URL;
+
 export const loanPaymentApi = createApi({
   reducerPath: "loanPaymentApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5000/api/loanPayments",
+    baseUrl: `${backendBaseUrl}/api/loanPayments`, // Use the environment variable
   }),
   tagTypes: ["Loans"],
   endpoints: (builder) => ({
@@ -43,6 +46,9 @@ export const loanPaymentApi = createApi({
       query: () => "/report",
       providesTags: ["Loans"],
     }),
+    getLoanPaymentAndLoanById: builder.query({
+      query: (id) => `/loan-payment-and-loan/${id}`,
+    }),
   }),
 });
 
@@ -50,6 +56,7 @@ export const {
   useGetAllLoanPaymentsQuery,
   useGetLoanPaymentByIdQuery,
   useGetLoanPaymentReportQuery,
+  useGetLoanPaymentAndLoanByIdQuery,
   useCreateLoanPaymentMutation,
   useUpdateLoanPaymentMutation,
   useDeleteLoanPaymentMutation,

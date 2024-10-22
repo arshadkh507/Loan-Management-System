@@ -40,7 +40,9 @@ const addCustomerPayment = async (req, res) => {
 const getCustomerPayments = async (req, res) => {
   try {
     // const payments = await CustomerPayment.find().populate("loanId customerId");
-    const payments = await CustomerPayment.find().sort({ createdAt: -1 });
+    const payments = await CustomerPayment.find()
+      .populate("customerId")
+      .sort({ createdAt: -1 });
     res.status(200).json(payments);
   } catch (error) {
     res.status(500).json({ message: "Error fetching payments", error });

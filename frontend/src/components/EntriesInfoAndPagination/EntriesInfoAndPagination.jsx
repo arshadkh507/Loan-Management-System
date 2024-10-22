@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Button } from "react-bootstrap";
+import "../../assets/css/pagesStyle.css";
 
 const EntriesInfoAndPagination = ({
   paginatedItems,
@@ -9,7 +10,10 @@ const EntriesInfoAndPagination = ({
   handlePageChange,
 }) => {
   return (
-    <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
+    <div
+      id="pagination"
+      className="d-flex flex-column flex-md-row justify-content-between align-items-center"
+    >
       <div className="my-2">
         {`Showing ${paginatedItems.length} of ${totalItems.length} entries`}
       </div>

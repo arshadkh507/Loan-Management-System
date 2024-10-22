@@ -12,9 +12,10 @@ const customerPaymentSchema = new mongoose.Schema({
     ref: "Customer",
     required: true,
   },
-  customerName: {
-    type: String,
-    required: true,
+  loanPaymentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "LoanPayment",
+    required: false,
   },
   credit: {
     type: Number,

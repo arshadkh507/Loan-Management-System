@@ -1,9 +1,11 @@
-// // loanApi.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+// Access the backend API base URL from environment variables
+const backendBaseUrl = import.meta.env.VITE_LMS_BACKEND_API_BASE_URL;
 
 export const loanApi = createApi({
   reducerPath: "loanApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:5000/api/loans" }),
+  baseQuery: fetchBaseQuery({ baseUrl: `${backendBaseUrl}/api/loans` }), // Use the environment variable
   tagTypes: ["Loans"], // Add tagTypes here to manage invalidation
   endpoints: (builder) => ({
     getLoans: builder.query({
@@ -42,6 +44,12 @@ export const loanApi = createApi({
     getDashboardData: builder.query({
       query: () => "dashboard",
     }),
+    getLoanSummary: builder.query({
+      query: () => "/loan-summary",
+    }),
+    getSingleCustomerLoanSummary: builder.query({
+      query: (id) => `/loan-summary/${id}`,
+    }),
   }),
 });
 
@@ -50,6 +58,8 @@ export const {
   useGetLoanByIdQuery,
   useGetCustomerLedgerQuery,
   useGetDashboardDataQuery,
+  useGetLoanSummaryQuery,
+  useGetSingleCustomerLoanSummaryQuery,
   useAddLoanMutation,
   useUpdateLoanMutation,
   useDeleteLoanMutation,

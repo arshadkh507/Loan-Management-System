@@ -42,11 +42,15 @@ const LoanDetails = () => {
     isSuccess,
     refetch,
   } = useGetLoansQuery();
-  const [deleteLoan, { isLoading: isDeleting, isError: deleteError }] =
-    useDeleteLoanMutation(); // Add deleteLoan mutation
+  const [
+    deleteLoan,
+    { isLoading: isDeleting, isError: deleteError, error: deletingError },
+  ] = useDeleteLoanMutation(); // Add deleteLoan mutation
+
+  console.log(loans);
 
   const filteredLoans = loans.filter((loan) =>
-    loan.customerName.toLowerCase().includes(filter.toLowerCase())
+    loan.customerId.fullName.toLowerCase().includes(filter.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredLoans.length / entriesToShow);
@@ -118,6 +122,12 @@ const LoanDetails = () => {
 
       {isLoading && <LoadingSpinner />}
 
+      {deleteError && (
+        <Alert variant="danger">
+          {deletingError.data?.message || "Failed to load loans."}
+        </Alert>
+      )}
+
       {isError && (
         <Alert variant="danger">
           {fetchError.data?.message || "Failed to load loans."}
@@ -150,7 +160,9 @@ const LoanDetails = () => {
                     className={loan._id === id ? "table-info" : ""}
                   >
                     <td>{(currentPage - 1) * entriesToShow + index + 1}</td>
-                    <td className="customer-name">{loan.customerName}</td>
+                    <td className="customer-name">
+                      {loan.customerId.fullName}
+                    </td>
                     <td>{loan.loanAmount}</td>
                     <td>{loan.interestRate}%</td>
                     <td>{loan.duration}</td>

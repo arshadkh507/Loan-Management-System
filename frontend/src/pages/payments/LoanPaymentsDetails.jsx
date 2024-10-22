@@ -17,15 +17,7 @@ import {
 } from "../../components/AlertComponents/AlertComponents";
 import "./loanPaymentsDetails.css";
 import "../../assets/css/pagesStyle.css";
-
-// Utility function to format date as dd-mm-yyyy
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const day = String(date.getDate()).padStart(2, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+import { formatDate } from "../../utils/dataFuction";
 
 const LoanPaymentsDetails = () => {
   const navigate = useNavigate();
@@ -43,6 +35,8 @@ const LoanPaymentsDetails = () => {
   const [deleteLoanPayment, { isLoading: isDeleting, isError: deleteError }] =
     useDeleteLoanPaymentMutation();
 
+  console.log("LoanPayments: ", loanPayments);
+
   useEffect(() => {
     refetch();
   }, [location, refetch]);
@@ -50,8 +44,9 @@ const LoanPaymentsDetails = () => {
   const filteredPayments =
     loanPayments?.filter(
       (payment) =>
-        payment.customerName?.toLowerCase().includes(filter.toLowerCase()) &&
-        payment.status === "installment"
+        payment.customerId?.fullName
+          ?.toLowerCase()
+          .includes(filter.toLowerCase()) && payment.status === "installment"
     ) || [];
 
   const totalPages = Math.ceil(filteredPayments.length / entriesToShow);
@@ -118,9 +113,9 @@ const LoanPaymentsDetails = () => {
                 <th>S.No</th>
                 <th>Customer Name</th>
                 <th>Loan</th>
+                <th>Date</th>
                 <th>Paid</th>
                 <th>Remaining</th>
-
                 <th>Actions</th>
               </tr>
             </thead>
@@ -129,8 +124,11 @@ const LoanPaymentsDetails = () => {
                 paginatedPayments.map((payment, index) => (
                   <tr key={payment._id}>
                     <td>{(currentPage - 1) * entriesToShow + index + 1}</td>
-                    <td className="customer-name">{payment.customerName}</td>
+                    <td className="customer-name">
+                      {payment.customerId.fullName}
+                    </td>
                     <td>{payment.totalAmount}</td>
+                    <td>{formatDate(payment.paymentDate)}</td>
                     <td>{payment.paid}</td>
                     <td>{payment.remaining}</td>
 

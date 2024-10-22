@@ -24,6 +24,8 @@ const SingleCustomerReport = () => {
     isError: loansError,
   } = useGetLoansQuery();
 
+  console.log("loans: ", loans);
+
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [customerLoans, setCustomerLoans] = useState([]);
@@ -38,6 +40,8 @@ const SingleCustomerReport = () => {
     selectedCustomer ? selectedCustomer.value : null
   );
 
+  console.log("customerPayments : ", customerPayments);
+
   const {
     data: loanPayments = [],
     isLoading: loanPaymentsLoading,
@@ -46,6 +50,8 @@ const SingleCustomerReport = () => {
   } = useGetAllLoanPaymentsQuery(
     selectedCustomer ? selectedCustomer.value : null
   );
+
+  console.log("loanPayments : ", loanPayments);
 
   useEffect(() => {
     if (selectedCustomer || location) {
@@ -57,22 +63,22 @@ const SingleCustomerReport = () => {
     if (selectedCustomer) {
       // Filter loans for the selected customer
       const filteredLoans = loans.filter(
-        (loan) => loan.customerId === selectedCustomer.value
+        (loan) => loan.customerId._id === selectedCustomer.value
       );
       setCustomerLoans(filteredLoans);
       // Filter customer payments (installments)
       const filteredCustomerPayments = customerPayments.filter(
         (payment) =>
-          payment.customerId === selectedCustomer.value &&
+          payment.customerId._id === selectedCustomer.value &&
           payment.status === "installment"
       );
 
       // Filter loan payments and combine with corresponding loan data
       const filteredLoanPaymentsData = loanPayments
-        .filter((payment) => payment.customerId === selectedCustomer.value)
+        .filter((payment) => payment.customerId._id === selectedCustomer.value)
         .map((payment) => {
           const correspondingLoan = loans.find(
-            (loan) => loan._id === payment.loanId
+            (loan) => loan._id === payment.loanId._id
           );
           return correspondingLoan
             ? {
@@ -95,7 +101,7 @@ const SingleCustomerReport = () => {
   // Handle customer change
   const handleCustomerChange = (selectedOption) => {
     setSelectedCustomer(selectedOption);
-    setSelectedLoan(null); // Reset loan selection on customer change
+    setSelectedLoan(null);
   };
 
   // Handle loan change
@@ -105,10 +111,10 @@ const SingleCustomerReport = () => {
 
   // Customer select options
   const customerOptions = loans.reduce((acc, loan) => {
-    if (!acc.some((option) => option.value === loan.customerId)) {
+    if (!acc.some((option) => option.value === loan.customerId._id)) {
       acc.push({
-        value: loan.customerId,
-        label: loan.customerName,
+        value: loan.customerId._id,
+        label: loan.customerId.fullName,
       });
     }
     return acc;

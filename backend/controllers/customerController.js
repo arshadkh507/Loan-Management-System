@@ -1,4 +1,5 @@
 const Customer = require("../models/customerModel");
+const CustomerPayment = require("../models/customerPaymentModel");
 const Loan = require("../models/LoanModel");
 const LoanPayment = require("../models/LoanPaymentsModel");
 
@@ -94,7 +95,17 @@ const deleteCustomer = async (req, res) => {
     if (!customer) {
       return res.status(404).json({ message: "Customer not found" });
     }
-    res.json({ message: "Customer deleted successfully" });
+
+    // Find and delete all loans associated with the customer
+    await Loan.deleteMany({ customerId: customer._id });
+
+    // Find and delete all customer payments associated with the customer
+    await CustomerPayment.deleteMany({ customerId: customer._id });
+
+    // Find and delete all loan payments associated with the customer's loans
+    await LoanPayment.deleteMany({ customerId: customer._id });
+
+    res.json({ message: "Customer and related data deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

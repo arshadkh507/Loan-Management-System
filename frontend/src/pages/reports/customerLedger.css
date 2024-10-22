@@ -11,22 +11,6 @@
   }
 }
 
-/* 
-  /* table th {
-    text-align: right;
-  } 
-
-  .page-container {
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-}
-
-/* .customer-ledger-details {
-  border: 1px solid gray !important;
-} 
-
-*/
 .customer-ledger-details tbody tr,
 .customer-ledger-details tbody tr td,
 .customer-ledger-details tbody tr th {

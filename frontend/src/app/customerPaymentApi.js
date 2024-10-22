@@ -1,10 +1,11 @@
 // src/app/customerPaymentApi.js
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
+// Access the backend API base URL from environment variables
+const backendBaseUrl = import.meta.env.VITE_LMS_BACKEND_API_BASE_URL;
 export const customerPaymentApi = createApi({
   reducerPath: "customerPaymentApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5000/api/customerPayments",
+    baseUrl: `${backendBaseUrl}/api/customerPayments`, // Use the environment variable
   }),
   tagTypes: ["CustomerPayment"],
   endpoints: (builder) => ({

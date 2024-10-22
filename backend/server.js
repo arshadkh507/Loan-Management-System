@@ -14,7 +14,7 @@ connectDB();
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace with your frontend origin
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173", // Fallback to default
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })

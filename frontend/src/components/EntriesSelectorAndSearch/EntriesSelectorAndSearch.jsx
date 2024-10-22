@@ -14,7 +14,10 @@ const EntriesSelectorAndSearch = ({
   };
 
   return (
-    <Row className="mb-3 d-flex justify-content-between">
+    <Row
+      id="search-bar-and-filter"
+      className="mb-3 d-flex justify-content-between print-not-show"
+    >
       <Col md={4} className="my-2">
         <Form.Group
           controlId="entriesToShow"

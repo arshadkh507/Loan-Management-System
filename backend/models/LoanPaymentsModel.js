@@ -12,10 +12,6 @@ const LoanPaymentSchema = new mongoose.Schema(
       required: true,
       ref: "Customer",
     },
-    customerName: {
-      type: String,
-      required: true,
-    },
     totalAmount: {
       type: Number,
       required: true,

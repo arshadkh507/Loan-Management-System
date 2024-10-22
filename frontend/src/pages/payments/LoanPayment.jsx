@@ -20,6 +20,7 @@ const LoanPayment = () => {
     isError: loansError,
     // refetch,
   } = useGetLoansQuery();
+
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [filteredCustomerLoans, setFilteredCustomerLoans] = useState([]);
   const [filteredInstallmentPayments, setFilteredInstallmentPayments] =
@@ -55,21 +56,17 @@ const LoanPayment = () => {
   useEffect(() => {
     if (selectedCustomer) {
       const filteredLoans = loans.filter(
-        (loan) => loan.customerId === selectedCustomer.value
+        (loan) => loan.customerId._id === selectedCustomer.value
       );
-
       const filteredInstallments = allCustomerPayments.filter(
         (payment) =>
-          payment.customerId === selectedCustomer.value &&
+          payment.customerId._id === selectedCustomer.value &&
           payment.status === "installment"
       );
 
-      // console.log("all customer payments ; ", allCustomerPayments);
-      // console.log("Installmetns; ", filteredInstallments);
-
       const loanPayments = allLoanPayments.filter(
         (payment) =>
-          payment.customerId === selectedCustomer.value &&
+          payment.customerId._id === selectedCustomer.value &&
           payment.status === "loan"
       );
 
@@ -90,9 +87,15 @@ const LoanPayment = () => {
       // Reverse the order of the loanPaymentsWithExtraDetails array
       const reversedLoanPayments = [...loanPaymentsWithExtraDetails].reverse();
 
-      // console.log("reverse loan apyments : ", reversedLoanPayments);
+      console.log("filteredLoans ", filteredLoans);
+      console.log("filteredInstallments ", filteredInstallments);
+      console.log(
+        "loanPaymentsWithExtraDetails ",
+        loanPaymentsWithExtraDetails
+      );
 
       setFilteredCustomerLoans(filteredLoans);
+
       setFilteredInstallmentPayments(filteredInstallments);
       setLoanPaymentsWithDetails(reversedLoanPayments);
     } else {
@@ -112,16 +115,16 @@ const LoanPayment = () => {
     setSelectedLoan({ ...loan, index }); // Set the selected loan with index
     const filteredPayments = allCustomerPayments.filter(
       (payment) =>
-        payment.loanId === loan.loanId && payment.status === "installment"
+        payment.loanId === loan.loanId._id && payment.status === "installment"
     );
     setFilteredInstallmentPayments(filteredPayments);
   };
 
   const customerOptions = loans.reduce((acc, loan) => {
-    if (!acc.some((option) => option.value === loan.customerId)) {
+    if (!acc.some((option) => option.value === loan.customerId._id)) {
       acc.push({
-        value: loan.customerId,
-        label: loan.customerName,
+        value: loan.customerId._id,
+        label: loan.customerId.fullName,
       });
     }
     return acc;
@@ -161,7 +164,7 @@ const LoanPayment = () => {
                       {loanPaymentsWithDetails.map((loan, index) => (
                         // loan.remaining > 0 &&
                         <CustomerLoanItem
-                          key={loan.loanId}
+                          key={loan._id}
                           loan={loan}
                           loanIndex={index + 1} // Passing loan index
                           onLoanClick={handleLoanClick}

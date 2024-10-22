@@ -8,7 +8,7 @@ import "./customerLedger.css";
 import { useLocation } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import PrintCustomerLedger from "../printPages/PrintCustomerLedger";
-import { formatDate } from "../../../utils/dataFuction";
+import { formatDate } from "../../utils/dataFuction";
 
 const CustomerLedger = () => {
   const location = useLocation();
@@ -21,6 +21,7 @@ const CustomerLedger = () => {
     isError: loansError,
     refetch: loanRefetch,
   } = useGetLoansQuery();
+  console.log("loans : ", loans);
   const {
     data: customerLedgerData = [],
     isLoading: isLedgerDataLoading,
@@ -29,7 +30,7 @@ const CustomerLedger = () => {
   } = useGetCustomerLedgerQuery(
     selectedCustomer ? selectedCustomer.value : null
   );
-
+  console.log("customerLedgerData : ", customerLedgerData);
   useEffect(() => {
     if (selectedCustomer) {
       customerLedgerRefetch();
@@ -48,21 +49,11 @@ const CustomerLedger = () => {
     setSelectedCustomer(selectedOption);
   };
 
-  // const handlePrint = () => {
-  //   let originalContent = window.document.body.innerHTML;
-  //   const element = printArea.current;
-  //   let printContent = element.innerHTML;
-  //   document.body.innerHTML = printContent;
-  //   window.print();
-  //   document.body.innerHTML = originalContent;
-  //   window.location.reload();
-  // };
-
   const customerOptions = loans.reduce((acc, loan) => {
-    if (!acc.some((options) => options.value === loan.customerId)) {
+    if (!acc.some((options) => options.value === loan.customerId._id)) {
       acc.push({
-        value: loan.customerId,
-        label: loan.customerName,
+        value: loan.customerId._id,
+        label: loan.customerId.fullName,
       });
     }
     return acc;

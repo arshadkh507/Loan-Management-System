@@ -36,6 +36,8 @@ const LoanReport = () => {
     isError,
   } = useGetLoanPaymentReportQuery();
 
+  console.log("loans Payments report: ", loans);
+
   useEffect(() => {
     console.log(loans);
     if (loans && loans.length > 0) {
@@ -58,7 +60,7 @@ const LoanReport = () => {
   }, [loans]);
 
   const filteredLoans = loans.filter((loan) =>
-    loan.customerName.toLowerCase().includes(filter.toLowerCase())
+    loan.customerId.fullName.toLowerCase().includes(filter.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredLoans.length / entriesToShow);
@@ -75,7 +77,6 @@ const LoanReport = () => {
     setCurrentPage(pageNumber);
   };
 
-  // Function to handle row click and navigate to details page
   const handleRowClick = (loanId) => {
     navigate(`/loans/details/${loanId}`);
     // navigate(`/loans/details`);
@@ -132,7 +133,9 @@ const LoanReport = () => {
                       style={{ cursor: "pointer" }}
                     >
                       <td>{(currentPage - 1) * entriesToShow + index + 1}</td>
-                      <td className="customer-name">{loan.customerName}</td>
+                      <td className="customer-name">
+                        {loan.customerId.fullName}
+                      </td>
                       <td>{loan.loanId.loanAmount}</td>
                       <td>{loan.loanId.interestRate}%</td>
                       <td>{loan.loanId.duration}</td>
@@ -154,7 +157,7 @@ const LoanReport = () => {
                 </>
               ) : (
                 <tr>
-                  <td colSpan="10" className="text-center">
+                  <td colSpan="11" className="text-center">
                     No data available
                   </td>
                 </tr>

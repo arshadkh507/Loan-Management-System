@@ -21,11 +21,11 @@ const CustomerLoanItem = ({ loan, loanIndex, onLoanClick }) => {
       </div>
       <div className="detail-item">
         <span className="label">Monthly Repayment:</span>
-        <span className="value">{loan.monthlyRepayment}</span>
+        <span className="value">{loan.loanId.monthlyRepayment}</span>
       </div>
       <div className="detail-item">
         <span className="label">Total Months:</span>
-        <span className="value">{loan.duration}</span>
+        <span className="value">{loan.loanId.duration}</span>
       </div>
       <div className="detail-item">
         <span className="label">Paid:</span>

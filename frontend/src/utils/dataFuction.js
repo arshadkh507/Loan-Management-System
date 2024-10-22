@@ -6,4 +6,10 @@ const formatDate = (dateString) => {
   return `${day}-${month}-${year}`; // Format as dd-mm-yyyy
 };
 
-export { formatDate };
+// Helper function to get today's date in 'YYYY-MM-DD' format
+const getTodayDate = () => {
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+};
+
+export { formatDate, getTodayDate };

@@ -134,35 +134,42 @@ const CustomerDetails = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedCustomers.map((customer, index) => (
-                <tr key={customer._id}>
-                  <td>{(currentPage - 1) * entriesToShow + index + 1}</td>
-                  {/* Serial Number */}
-                  <td className="customer-name">{customer.fullName}</td>
-                  <td>{customer.email}</td>
-                  <td>{customer.phoneNumber}</td>
-                  <td>{customer.address}</td>
-                  <td>{customer.additionalInfo}</td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      className="me-2"
-                      onClick={() => handleEditCustomer(customer._id)}
-                    >
-                      <FaEdit />
-                    </Button>
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => handleDeleteCustomer(customer._id)}
-                      disabled={isDeleting}
-                    >
-                      <FaTrash className="deleteIcon" />
-                    </Button>
+              {paginatedCustomers?.length > 0 ? (
+                paginatedCustomers.map((customer, index) => (
+                  <tr key={customer._id}>
+                    <td>{(currentPage - 1) * entriesToShow + index + 1}</td>
+                    <td className="customer-name">{customer.fullName}</td>
+                    <td>{customer.email}</td>
+                    <td>{customer.phoneNumber}</td>
+                    <td>{customer.address}</td>
+                    <td>{customer.additionalInfo}</td>
+                    <td>
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        className="me-2"
+                        onClick={() => handleEditCustomer(customer._id)}
+                      >
+                        <FaEdit />
+                      </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => handleDeleteCustomer(customer._id)}
+                        disabled={isDeleting}
+                      >
+                        <FaTrash className="deleteIcon" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="10" className="text-center">
+                    No data available
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </Table>
 

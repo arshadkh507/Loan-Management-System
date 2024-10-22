@@ -30,6 +30,7 @@ const Sidebar = ({
     loanPayments: false,
     customers: false,
     reports: false,
+    summaries: false,
     settings: false,
   });
 
@@ -266,6 +267,48 @@ const Sidebar = ({
           </div>
         )}
 
+        {/* Loan Summary */}
+
+        <div
+          className={`menu-item`}
+          onClick={() => toggleDropdown("summaries")}
+        >
+          <FaUser className="tab-icon" />
+          <span className="menu-text">Summary</span>
+          {dropdownOpen.summaries ? (
+            <FaChevronUp className="dropdown-icon" />
+          ) : (
+            <FaChevronLeft className="dropdown-icon" />
+          )}
+        </div>
+        {dropdownOpen.summaries && (
+          <div
+            className={`dropdownMenu ${dropdownOpen.summaries ? "show" : ""}`}
+          >
+            <Link
+              to="/loan-summary"
+              className={`dropdownItem ${
+                activeTab === "/loan-summary" ? "active" : ""
+              }`}
+              onClick={handleLinkClick}
+            >
+              <FaArrowRight className="dropdownItemIcon" /> Loan Summary
+            </Link>
+            <Link
+              to="/loan-summary/single-customer-summary"
+              className={`dropdownItem ${
+                activeTab === "/loan-summary/single-customer-summary"
+                  ? "active"
+                  : ""
+              }`}
+              onClick={handleLinkClick}
+            >
+              <FaArrowRight className="dropdownItemIcon" /> Single Customer
+              Summary
+            </Link>
+          </div>
+        )}
+
         <div className={`menu-item`} onClick={() => toggleDropdown("settings")}>
           <FaCog className="tab-icon" />
           <span className="menu-text">Settings</span>
@@ -279,7 +322,7 @@ const Sidebar = ({
           <div
             className={`dropdownMenu ${dropdownOpen.settings ? "show" : ""}`}
           >
-            <Link
+            {/* <Link
               to="/settings/payment-types"
               className={`dropdownItem ${
                 activeTab === "/settings/payment-types" ? "active" : ""
@@ -287,7 +330,7 @@ const Sidebar = ({
               onClick={handleLinkClick}
             >
               <FaArrowRight className="dropdownItemIcon" /> Payment Types
-            </Link>
+            </Link> */}
           </div>
         )}
       </div>

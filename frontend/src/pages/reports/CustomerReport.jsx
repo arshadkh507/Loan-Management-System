@@ -23,6 +23,8 @@ const CustomerReport = () => {
     refetch,
   } = useGetCustomerReportQuery();
 
+  console.log("customerData report: ", customerData);
+
   // Calculate total loan amount sum
   useEffect(() => {
     if (customerData && customerData.length > 0) {
@@ -52,7 +54,6 @@ const CustomerReport = () => {
     currentPage * entriesToShow
   );
 
-  console.log(paginatedCustomers);
   // Handle Page Change
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -107,30 +108,40 @@ const CustomerReport = () => {
               </tr>
             </thead>
             <tbody>
-              {paginatedCustomers.map((customer, index) => (
-                <tr
-                  key={customer.id}
-                  onClick={() => handleRowClick(customer.id)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <td>{(currentPage - 1) * entriesToShow + index + 1}</td>
-                  {/* Serial Number */}
-                  <td className="customer-name">{customer.fullName}</td>
-                  <td>{customer.email}</td>
-                  <td>{customer.phoneNumber}</td>
-                  <td>{customer.totalLoans}</td>
-                  <td>{customer.totalLoanAmount}</td>
-                  <td>{customer.totalPaid}</td>
-                  <td>{customer.totalRemaining}</td>
-                  <td>{customer.address}</td>
+              {paginatedCustomers?.length > 0 ? (
+                <>
+                  {paginatedCustomers.map((customer, index) => (
+                    <tr
+                      key={customer.id}
+                      onClick={() => handleRowClick(customer.id)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <td>{(currentPage - 1) * entriesToShow + index + 1}</td>
+                      {/* Serial Number */}
+                      <td className="customer-name">{customer.fullName}</td>
+                      <td>{customer.email}</td>
+                      <td>{customer.phoneNumber}</td>
+                      <td>{customer.totalLoans}</td>
+                      <td>{customer.totalLoanAmount}</td>
+                      <td>{customer.totalPaid}</td>
+                      <td>{customer.totalRemaining}</td>
+                      <td>{customer.address}</td>
+                    </tr>
+                  ))}
+                  <tr className="total-row">
+                    <td colSpan={5} className="report-total">
+                      Total
+                    </td>
+                    <td colSpan={4}>{totalLoanAmountSum}</td>
+                  </tr>
+                </>
+              ) : (
+                <tr>
+                  <td colSpan="10" className="text-center">
+                    No data available
+                  </td>
                 </tr>
-              ))}
-              <tr className="total-row">
-                <td colSpan={5} className="report-total">
-                  Total
-                </td>
-                <td colSpan={4}>{totalLoanAmountSum}</td>
-              </tr>
+              )}
             </tbody>
           </Table>
 
